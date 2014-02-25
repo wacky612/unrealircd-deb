@@ -1,0 +1,5 @@
+unrealircd (3.2.10.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- wacky <wacky@ring.box2.kmc.gr.jp>  Wed, 25 Dec 2013 17:23:09 +0900

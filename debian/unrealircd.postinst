@@ -1,0 +1,11 @@
+#!/bin/sh
+# postinst script for unrealircd
+#
+# see: dh_installdeb(1)
+
+chgrp irc /usr/bin/ircd
+chmod 750 /usr/bin/ircd
+
+chown -R irc:irc /etc/unrealircd
+
+exit 0

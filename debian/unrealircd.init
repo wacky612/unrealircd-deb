@@ -1,0 +1,115 @@
+#!/bin/sh
+#
+# /etc/init.d/unrealircd  Start unrealircd
+#
+### BEGIN INIT INFO
+# Provides:          unrealircd
+# Required-Start:    $network $local_fs $syslog
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: <Enter a short description of the software>
+# Description:       <Enter a long description of the software>
+#                    <...>
+#                    <...>
+### END INIT INFO
+
+# Author: wacky <wacky@kmc.gr.jp>
+
+PATH=/bin:/usr/bin
+NAME=unrealircd             # Introduce the short server's name here
+DAEMON=/usr/bin/ircd # Introduce the server's location here
+PIDFILE=/run/ircd.pid
+SCRIPTNAME=/etc/init.d/$NAME
+SU=/bin/su
+
+# Exit if the package is not installed
+[ -x $DAEMON ] || exit 0
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+do_start()
+{
+	if [ -r $PIDFILE ] ; then
+		echo "UnrealIRCd is already running"
+		return 0
+	fi
+	$SU -c $DAEMON irc
+	sleep 1
+	if [ ! -r /etc/unrealircd/ircd.pid ] ; then
+		echo "Possible error encountered (IRCd seemingly not started)"	
+		echo "====================================================="
+		echo "Check above for possible errors, and this output of  "
+		echo "ircd.log. If you cannot solve the problem, read"
+		echo "Unreal.nfo on where to get support"
+		echo "====================================================="
+		tail -n 5 /etc/unrealircd/ircd.log
+		return 2
+	fi
+	mv /etc/unrealircd/ircd.pid $PIDFILE
+	echo "Starting UnrealIRCd"
+	return 0
+}
+
+do_stop()
+{
+	if [ ! -r $PIDFILE ] ; then
+		echo "UnrealIRCd was already stopped"
+		return 0
+	fi
+	kill -9 `cat $PIDFILE`
+	RETVAL="$?"
+	[ "$RETVAL" = 0 ] && rm -f $PIDFILE
+	return "$RETVAL"
+}
+
+do_reload() {
+	echo "Reloading UnrealIRCd"
+	if [ ! -r $PIDFILE ] ; then
+		echo "ERROR: UnrealIRCd is not running"
+		return 1
+	fi
+	kill -1 `cat $PIDFILE`
+	return 0
+}
+
+do_restart() {
+	echo "Restarting UnrealIRCd"
+	if [ ! -r $PIDFILE ] ; then
+		echo "ERROR: UnrealIRCd is not running"
+		return 1
+	fi
+	kill -2 `cat $PIDFILE`
+	return 0
+}
+
+case "$1" in
+	start)
+		do_start
+		;;
+	stop)
+		do_stop
+		;;
+	status)
+		status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+		;;
+	reload)
+		do_reload
+		;;
+	restart|force-reload)
+		do_restart
+		;;
+	*)
+		echo "Usage: $SCRIPTNAME {start|stop|status|reload|restart|force-reload}" >&2
+		exit 3
+		;;
+esac
+
