@@ -16,4 +16,4 @@ override_dh_auto_install:
 	make IRCDDIR=debian/unrealircd/etc/unrealircd BINDIR=debian/unrealircd/usr/bin/ircd install
 
 %:
-	dh $@  --with autotools-dev
+	dh $@  --with autotools-dev,systemd
